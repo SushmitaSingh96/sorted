@@ -36,11 +36,19 @@ def predict_image(image_path):
     
     # Display image with predicted label
     plt.imshow(image)
-    plt.title(f"Predicted Fabric: {fabric_type}", fontsize=16)
+    plt.title(f"Predicted Fabric: {fabric_type} | Sustainability Score: 7", fontsize=16)
     plt.axis("off")
     plt.show()
 
-# 5. CLI usage
+# 5. Entry point
 if __name__ == "__main__":
-    image_path = os.path.join("test_p.jpg")  # or use sys.argv[1]
+    if len(sys.argv) < 2:
+        print("Usage: python inference.py <image_path>")
+        sys.exit(1)
+
+    image_path = sys.argv[1]
+    if not os.path.exists(image_path):
+        print(f"Error: Image not found: {image_path}")
+        sys.exit(1)
+
     predict_image(image_path)
