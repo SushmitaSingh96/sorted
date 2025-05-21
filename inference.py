@@ -5,6 +5,7 @@ from PIL import Image
 import joblib
 from transformers import CLIPProcessor, CLIPModel
 import os
+import matplotlib.pyplot as plt
 
 # 1. Load CLIP model and processor
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -24,15 +25,22 @@ def extract_features(img_path):
         image_features = model.get_image_features(**inputs)
     return image_features.cpu().numpy().flatten()
 
-# 4. Predict
+# 4. Predict and display image
 def predict_image(image_path):
+    image = Image.open(image_path).convert("RGB")
     features = extract_features(image_path).reshape(1, -1)
     prediction = clf.predict(features)[0]
     fabric_type = inv_label_map[prediction]
+    
     print(f"Predicted fabric: {fabric_type}")
+    
+    # Display image with predicted label
+    plt.imshow(image)
+    plt.title(f"Predicted Fabric: {fabric_type}", fontsize=16)
+    plt.axis("off")
+    plt.show()
 
 # 5. CLI usage
 if __name__ == "__main__":
-    image_path = os.path.join("test_v.jpg")
-    #image_path = sys.argv[1]
+    image_path = os.path.join("test_p.jpg")  # or use sys.argv[1]
     predict_image(image_path)
