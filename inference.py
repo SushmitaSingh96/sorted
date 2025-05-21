@@ -25,20 +25,37 @@ def extract_features(img_path):
         image_features = model.get_image_features(**inputs)
     return image_features.cpu().numpy().flatten()
 
-# 4. Predict and display image
+import json
+import subprocess
+
 def predict_image(image_path):
     image = Image.open(image_path).convert("RGB")
     features = extract_features(image_path).reshape(1, -1)
     prediction = clf.predict(features)[0]
     fabric_type = inv_label_map[prediction]
-    
+
+    # Fabric-to-score mapping
+    sustainability_scores = {
+        "cotton": 6,
+        "polyester": 3,
+        "viscose": 4
+    }
+    sustainability_score = sustainability_scores.get(fabric_type.lower(), 0)
+
     print(f"Predicted fabric: {fabric_type}")
-    
-    # Display image with predicted label
-    plt.imshow(image)
-    plt.title(f"Predicted Fabric: {fabric_type} | Sustainability Score: 7", fontsize=16)
-    plt.axis("off")
-    plt.show()
+
+    # Save result to JSON
+    dashboard_data = {
+        "image_path": image_path,
+        "fabric": fabric_type,
+        "score": sustainability_score
+    }
+
+    with open("dashboard_input.json", "w") as f:
+        json.dump(dashboard_data, f)
+
+    # Launch dashboard
+    subprocess.Popen(["streamlit", "run", "dashboard.py"])
 
 # 5. Entry point
 if __name__ == "__main__":
